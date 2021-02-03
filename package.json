@@ -1,0 +1,25 @@
+{
+  "name": "youtube-watcher",
+  "version": "1.0.0",
+  "description": "YouTube Watch SERP",
+  "main": "App.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/SokolovDADeveloper/youtube-watcher.git"
+  },
+  "author": "SokolovDADeveloperSokolovDADeveloper",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/SokolovDADeveloper/youtube-watcher/issues"
+  },
+  "homepage": "https://github.com/SokolovDADeveloper/youtube-watcher#readme",
+  "dependencies": {
+    "axios": "^0.21.1",
+    "cheerio": "^1.0.0-rc.5",
+    "puppeteer": "^6.0.0",
+    "yargs": "^16.2.0"
+  }
+}
