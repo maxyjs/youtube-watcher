@@ -23,7 +23,7 @@ async function addVideoToPlaylist(instanceBrowser, id, addPlaylistMark) {
       await sleep(3000)
 
       const playlistsElem = document.querySelector('#playlists.style-scope.ytd-add-to-playlist-renderer')
-      const paperCheckboxes = [...playlistsElem.querySelectorAll('paper-checkbox#checkbox.style-scope.ytd-playlist-add-to-option-renderer')]
+      const paperCheckboxes = [...playlistsElem.querySelectorAll('#checkbox.style-scope.ytd-playlist-add-to-option-renderer')]
       const targetPaperCheckbox = await getTargetPaperCheckbox(playlistsElem,paperCheckboxes, addPlaylistMark)
 
       if (targetPaperCheckbox) {
