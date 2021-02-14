@@ -14,7 +14,7 @@ function createUrlFromOptions(queryOptions, numPage = 1) {
 
   const defaultDateTimeUpload = "allTime"
 
-  const { term, termOptions = {} } = queryOptions
+  const {term, termOptions = {}} = queryOptions
 
   const dateTimeUpload = termOptions.dateTimeUpload ? termOptions.dateTimeUpload : defaultDateTimeUpload
 
@@ -37,9 +37,14 @@ async function getResultsForTerm(queryOptions) {
 
   const url = createUrlFromOptions(queryOptions)
 
-  let results = await scraper.scrapeResultSearchPage(url)
+  let results = []
 
-return results
+  try {
+    results = await scraper.scrapeResultSearchPage(url)
+    return results
+  } catch {
+    return results
+  }
 }
 
 module.exports = getResultsForTerm;
