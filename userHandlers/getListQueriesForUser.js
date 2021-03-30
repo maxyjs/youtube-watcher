@@ -4,8 +4,9 @@ function getTermsFromFile(path) {
   let termsAsStringFromFile = fs.readFileSync(path, { encoding: 'utf8' });
   termsAsStringFromFile = termsAsStringFromFile.replace(/(\r\n){2,}/g, '');
   termsAsStringFromFile = termsAsStringFromFile.replace(/[ ]{2,}/g, ' ');
-  const termsArray = getTermsAsArray(termsAsStringFromFile);
-  return termsArray;
+  const termsArray = termsAsStringFromFile.split(/\r?\n/);
+  const uniqueArray = [...new Set(termsArray)];
+  return uniqueArray;
 }
 
 function handleList(list, user) {
@@ -48,12 +49,6 @@ function getListQueriesForUser(user) {
   } catch (err) {
     throw err;
   }
-}
-
-function getTermsAsArray(termsAsStringFromFile) {
-  const termsArray = termsAsStringFromFile.split(/\r?\n/);
-  const uniqueArray = [...new Set(termsArray)];
-  return uniqueArray;
 }
 
 function setOptionsForFilterResults(user, termOptions) {
