@@ -1,5 +1,5 @@
 const puppeteer = require('puppeteer')
-const saveNewCookiesToFile = require('./saveNewCookiesToFile')
+const saveNewCookiesToFile = require('../userHandlers/saveNewCookiesToFile')
 const {headlesMode} = require('../appSettings')
 
 async function getInstanceBrowser(user) {
