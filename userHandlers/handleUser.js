@@ -1,75 +1,78 @@
-const findNewResultsForUser = require('./findNewResultsForUser')
-const addAllVideosToPlaylist = require('./userPlaylistsHandlers/addAllVideosToPlaylist')
-const checkUserAuthDataValid = require('../userHandlers/checkUserAuthDataValid')
-const CacheAddedVideoToPlaylist = require('../cacheManagers/CacheAddedVideoToPlaylist')
+const findNewResultsForUser = require('./findNewResultsForUser');
+const addAllVideosToPlaylist = require('./userPlaylistsHandlers/addAllVideosToPlaylist');
+const checkUserAuthDataValid = require('../userHandlers/checkUserAuthDataValid');
+const CacheAddedVideoToPlaylist = require('../cacheManagers/CacheAddedVideoToPlaylist');
 
 async function handleUser(user, options) {
+  const { testMode } = options || false;
 
-  const {testMode} = options || false
-
-  const resultChecked = await checkUserAuthDataValid(user)
+  const resultChecked = await checkUserAuthDataValid(user);
 
   if (resultChecked.error === true) {
-    return resultChecked
+    return resultChecked;
   }
 
-  const cacheAddedVideoToPlaylist = new CacheAddedVideoToPlaylist(user)
+  const cacheAddedVideoToPlaylist = new CacheAddedVideoToPlaylist(user);
 
-  const newResults = await findNewResultsForUser(user, cacheAddedVideoToPlaylist)
+  const newResults = await findNewResultsForUser(
+    user,
+    cacheAddedVideoToPlaylist
+  );
   const allIdsVideos = newResults.map((result) => {
-    return result.video.id
-  })
+    return result.video.id;
+  });
 
   if (testMode === true) {
     if (allIdsVideos.length > 0) {
-      const baseUrl = "https://www.youtube.com/watch_videos?video_ids="
+      const baseUrl = 'https://www.youtube.com/watch_videos?video_ids=';
 
-      const allIdsVideos_string = allIdsVideos.join(",")
+      const allIdsVideos_string = allIdsVideos.join(',');
 
-      const playlist = `${baseUrl}${allIdsVideos_string}`
+      const playlist = `${baseUrl}${allIdsVideos_string}`;
 
-      console.log('\x1b[36m%s\x1b[0m', "Ссылка на анонимный плейлист с результатами поиска: \n", playlist);
+      console.log(
+        '\x1b[36m%s\x1b[0m',
+        'Ссылка на анонимный плейлист с результатами поиска: \n',
+        playlist
+      );
     } else {
       return {
-        message: 'Не найдено новых видео'
-      }
+        message: 'Не найдено новых видео',
+      };
     }
 
-    return
+    return;
   }
 
-  let resultsAdded = []
+  let resultsAdded = [];
 
   if (allIdsVideos.length > 0) {
     try {
-      resultsAdded = await addAllVideosToPlaylist(allIdsVideos, user)
-      saveAddedVideoToCacheFile(resultsAdded, cacheAddedVideoToPlaylist)
+      resultsAdded = await addAllVideosToPlaylist(allIdsVideos, user);
+      saveAddedVideoToCacheFile(resultsAdded, cacheAddedVideoToPlaylist);
     } catch (err) {
-      console.error(err)
+      console.error(err);
     }
-
   }
 
-  return resultsAdded
+  return resultsAdded;
 }
 
 function saveAddedVideoToCacheFile(resultsAdded, cacheAddedVideoToPlaylist) {
-
   const successfullyAddedList = resultsAdded.reduce((acc, resultAdded) => {
     if (resultAdded.isSuccessfullyAdded === true) {
-      acc.push(resultAdded.id)
-      return acc
-    }  else {
-      return acc
+      acc.push(resultAdded.id);
+      return acc;
+    } else {
+      return acc;
     }
-  }, [])
+  }, []);
 
-  console.log('Сохранено в обработанные: ', successfullyAddedList.length)
+  console.log('Сохранено в обработанные: ', successfullyAddedList.length);
 
   if (successfullyAddedList.length > 0) {
-    cacheAddedVideoToPlaylist.addListVideoIdToFile(successfullyAddedList)
+    cacheAddedVideoToPlaylist.addListVideoIdToFile(successfullyAddedList);
   }
-
 }
 
 module.exports = handleUser;

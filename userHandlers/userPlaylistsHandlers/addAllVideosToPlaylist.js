@@ -1,23 +1,23 @@
-const addVideoToPlaylist = require('./addVideoToPlaylist')
-const getInstanceBrowser = require('../getInstanceBrowser')
-
+const addVideoToPlaylist = require('./addVideoToPlaylist');
+const getInstanceBrowser = require('../../Browser/getInstanceBrowser');
 
 async function addAllVideosToPlaylist(videoIds, user) {
+  console.log('\x1b[44m%s\x1b[0m', 'Добавление видео в плейлист...');
 
-  console.log('\x1b[44m%s\x1b[0m', "Добавление видео в плейлист...")
+  const resultsAdded = [];
+  const instanceBrowser = await getInstanceBrowser(user);
 
-    const resultsAdded = []
-    const instanceBrowser = await getInstanceBrowser(user)
+  for (const id of videoIds) {
+    const result = await addVideoToPlaylist(
+      instanceBrowser,
+      id,
+      user.addPlaylistMark
+    );
+    resultsAdded.push(result);
+  }
 
-    for (const id of videoIds) {
-      const result = await addVideoToPlaylist(instanceBrowser, id, user.addPlaylistMark)
-      resultsAdded.push(result)
-    }
-
-    await instanceBrowser.browser.close()
-    return resultsAdded
-
+  await instanceBrowser.browser.close();
+  return resultsAdded;
 }
-
 
 module.exports = addAllVideosToPlaylist;

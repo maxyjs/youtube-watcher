@@ -91,32 +91,33 @@ async function getResultsForAllUrls(queryOptions) {
   const urls = createUrls(queryOptions);
 
   for (const url of urls) {
-
-    let resultsForUrl = []
+    let resultsForUrl = [];
 
     try {
       const results = await scraper.scrapeResultSearchPage(url);
-      allResults.push(...results)
+      allResults.push(...results);
 
       if (results.length >= 20) {
         try {
-          const resultsPage2 = await scraper.scrapeResultSearchPage(`${url}&page=2`);
+          const resultsPage2 = await scraper.scrapeResultSearchPage(
+            `${url}&page=2`
+          );
           allResults.push(...resultsPage2);
         } catch {
           showErrorResultScrapeSerp &&
-          console.log(
-            '\x1b[33m%s\x1b[0m',
-            'PAGE 2: failed scrape url:\n',
-            `${url}&page=2`
-          ); // font yellow
+            console.log(
+              '\x1b[33m%s\x1b[0m',
+              'PAGE 2: failed scrape url:\n',
+              `${url}&page=2`
+            ); // font yellow
         }
       }
     } catch {
       showErrorResultScrapeSerp &&
-      console.log('\x1b[33m%s\x1b[0m', 'failed scrape url:\n', url); // font yellow
+        console.log('\x1b[33m%s\x1b[0m', 'failed scrape url:\n', url); // font yellow
     }
 
-    allResults.push(...resultsForUrl)
+    allResults.push(...resultsForUrl);
   }
 
   return allResults;

@@ -1,62 +1,58 @@
-const fs = require('fs')
+const fs = require('fs');
 
 async function checkCookiesFile(user) {
+  const filePath = `${user.userDirectory}\\cookies.json`;
 
-  const filePath = `${user.userDirectory}\\cookies.json`
-
-  let resultChecked = checkByExistFile(filePath)
+  let resultChecked = checkByExistFile(filePath);
 
   if (resultChecked.error === true) {
-    return resultChecked
+    return resultChecked;
   }
 
-  resultChecked = checkByValidData(filePath)
+  resultChecked = checkByValidData(filePath);
 
   function checkByValidData(filePath) {
-
-    const data = require(filePath)
-    const isValid = data.length > 1
+    const data = require(filePath);
+    const isValid = data.length > 1;
 
     if (isValid) {
       return {
         isExist: true,
-        error: false
-      }
+        error: false,
+      };
     }
 
     return {
       isExist: true,
       error: true,
-      reason: `No valid data:\n${filePath}`
-    }
+      reason: `No valid data:\n${filePath}`,
+    };
   }
 
   function checkByExistFile(filePath) {
-
     try {
       if (fs.existsSync(filePath)) {
         return {
           isExist: true,
-          error: false
-        }
+          error: false,
+        };
       } else {
         return {
           isExist: false,
           error: true,
-          reason: `File not found at path:\n${filePath}`
-        }
+          reason: `File not found at path:\n${filePath}`,
+        };
       }
     } catch (err) {
       return {
         isExist: false,
         error: true,
-        reason: `File not found at path:\n${filePath}`
-      }
+        reason: `File not found at path:\n${filePath}`,
+      };
     }
-
   }
 
-  return resultChecked
+  return resultChecked;
 }
 
 module.exports = checkCookiesFile;

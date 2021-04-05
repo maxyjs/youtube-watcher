@@ -1,12 +1,10 @@
-const getListQueriesForUser = require('./getListQueriesForUser')
-const getAllResults = require('../resultsHandlers/getAllResults')
+const getListQueriesForUser = require('./getListQueriesForUser');
+const getAllResults = require('../resultsHandlers/getAllResults');
 
-
-async function  getResultForUserTerm(user){
-  const listQueries = getListQueriesForUser(user)
-  const result = await getAllResults(listQueries)
-  return result
+async function getResultForUserTerm(user) {
+  const listQueries = getListQueriesForUser(user);
+  const result = await getAllResults(listQueries);
+  return result;
 }
 
-
-module.exports = getResultForUserTerm
+module.exports = getResultForUserTerm;

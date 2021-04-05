@@ -1,16 +1,20 @@
-const puppeteer = require("puppeteer");
+const puppeteer = require('puppeteer');
 
 async function getLikeDislikeVideo(videoId) {
   const browser = await puppeteer.launch({
-    headless: true
+    headless: true,
   });
   const page = await browser.newPage();
-  await page.setViewport({width: 700, height: 500});
+  await page.setViewport({ width: 700, height: 500 });
   //
   await page.setRequestInterception(true);
 
   page.on('request', (req) => {
-    if (req.resourceType() === 'image' || req.resourceType() === 'stylesheet' || req.resourceType() === 'font') {
+    if (
+      req.resourceType() === 'image' ||
+      req.resourceType() === 'stylesheet' ||
+      req.resourceType() === 'font'
+    ) {
       req.abort();
     } else {
       req.continue();
@@ -22,23 +26,20 @@ async function getLikeDislikeVideo(videoId) {
 
   let sentimentValueText = await page.evaluate(() => {
     try {
-      const $likeBar = document.getElementById("like-bar");
+      const $likeBar = document.getElementById('like-bar');
       const sentimentValueText = $likeBar.style.width;
       return sentimentValueText;
     } catch (e) {
-      console.log("[Headless Chrome return Error]:\n", e);
+      console.log('[Headless Chrome return Error]:\n', e);
     }
-
   });
 
   await browser.close();
 
   if (sentimentValueText) {
-    const sentINT = +(sentimentValueText.replace("%", ''));
+    const sentINT = +sentimentValueText.replace('%', '');
     return sentINT;
   }
-
 }
-
 
 module.exports = getLikeDislikeVideo;

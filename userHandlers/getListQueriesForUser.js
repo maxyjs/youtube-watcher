@@ -5,7 +5,7 @@ function getTermsFromFile(path) {
   termsAsStringFromFile = termsAsStringFromFile.replace(/(\r\n){2,}/g, '');
   termsAsStringFromFile = termsAsStringFromFile.replace(/[ ]{2,}/g, ' ');
   let termsArray = termsAsStringFromFile.split(/\r?\n/);
-  termsArray = termsArray.map(term => term.trim())
+  termsArray = termsArray.map((term) => term.trim());
   const uniqueArray = [...new Set(termsArray)];
   return uniqueArray;
 }
