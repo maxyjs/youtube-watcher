@@ -1,9 +1,15 @@
 const axios = require('axios');
 
 async function scrapeResultSearchPage(url) {
-  const html = await getHTML(url);
-  const results = parseHtml(html);
-  return results;
+  const data = await getHTML(url);
+  if (data.error === false) {
+    const results = parseHtml(data.html);
+    return results;
+  } else {
+    console.error(data.message)
+    console.error(data.reason)
+    return []
+  }
 }
 
 async function getHTML(url) {
