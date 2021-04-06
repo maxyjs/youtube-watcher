@@ -1,8 +1,7 @@
 const getResultsForTerm = require('./getResultsForTerm.js');
+const resultsContainer = require('./../resultsHandlers/resultsContainer');
 
 async function getResultsForAllTerms(listQueries) {
-  const resultsForAllTerms = [];
-
   // todo: Change getResultsForAllTerms iterator
   async function* asyncIterator(listQueries) {
     let i = -1;
@@ -14,21 +13,13 @@ async function getResultsForAllTerms(listQueries) {
 
   for await (const [listQuery, i] of asyncIterator(listQueries)) {
     try {
-      let resultsForTerm = await getResultsForTerm(listQuery);
-
-      if (resultsForTerm.length !== 0) {
-        resultsForTerm = resultsForTerm.map((resultForTerm) => {
-          resultForTerm.queryOptions = listQuery;
-          return resultForTerm;
-        });
-        resultsForAllTerms.push(resultsForTerm);
-      }
+      await getResultsForTerm(resultsContainer, listQuery);
     } catch (err) {
       console.log(err);
     }
   }
 
-  return resultsForAllTerms;
+  return resultsContainer.getResults();
 }
 
 module.exports = getResultsForAllTerms;

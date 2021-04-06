@@ -13,7 +13,7 @@ function createUrlsByDateTime(chunk, queryOptions) {
     ],
     thisYear: [
       '&sp=CAASBAgFEAE%253D', // by relevance
-      '&sp=CAISBAgFEAE%253D ', // by date upload
+      '&sp=CAISBAgFEAE%253D', // by date upload
       '&sp=CAMSBAgFEAE%253D', // by views
       '&sp=CAESBAgFEAE%253D', // by rating
     ],
@@ -86,23 +86,26 @@ function createUrls(queryOptions) {
   return urls;
 }
 
-async function getResultsForAllUrls(queryOptions) {
-  let allResults = [];
+async function getResultsForAllUrls(resultsContainer, queryOptions) {
   const urls = createUrls(queryOptions);
 
   for (const url of urls) {
-    let resultsForUrl = [];
-
     try {
       const results = await scraper.scrapeResultSearchPage(url);
-      allResults.push(...results);
+      results.forEach((result) => {
+        result.queryOptions = queryOptions;
+        resultsContainer.addResult(result);
+      });
 
       if (results.length >= 20) {
         try {
           const resultsPage2 = await scraper.scrapeResultSearchPage(
             `${url}&page=2`
           );
-          allResults.push(...resultsPage2);
+          resultsPage2.forEach((result) => {
+            result.queryOptions = queryOptions;
+            resultsContainer.addResult(result);
+          });
         } catch {
           showErrorResultScrapeSerp &&
             console.log(
@@ -116,17 +119,13 @@ async function getResultsForAllUrls(queryOptions) {
       showErrorResultScrapeSerp &&
         console.log('\x1b[33m%s\x1b[0m', 'failed scrape url:\n', url); // font yellow
     }
-
-    allResults.push(...resultsForUrl);
   }
 
-  return allResults;
+  return resultsContainer;
 }
 
-async function getResultsForTerm(queryOptions) {
-  const resultsForAllUrls = getResultsForAllUrls(queryOptions);
-
-  return resultsForAllUrls;
+async function getResultsForTerm(resultsContainer, queryOptions) {
+  await getResultsForAllUrls(resultsContainer, queryOptions);
 }
 
 module.exports = getResultsForTerm;
