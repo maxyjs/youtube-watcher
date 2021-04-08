@@ -137,16 +137,37 @@ function filterByRating(allResults) {
 }
 
 function filterByExact(filteredAllResults) {
-  const filteredByExact = filteredAllResults.filter((result) => {
-    const mandatoryKeywords = prepareMandatoryKeywords(result);
-    const isExact = checkExact(mandatoryKeywords, result.video.title);
-    return isExact;
-  });
+  const filteredByExact = filteredAllResults.filter(filterByTitle);
 
-  function prepareMandatoryKeywords(result) {
-    const keywords = result.queryOptions.term.toLowerCase().split(' ');
+  function filterByTitle(result) {
+    const titleLower = result.video.title.toLowerCase();
+    const term = result.queryOptions.term.toLowerCase();
+    const { withQuotes, withoutQuotes } = splitStringByQuotes(term);
+    const shortedKeywords = shortKeywords(withoutQuotes);
+
+    const isExact =
+      checkExact(shortedKeywords, titleLower) &&
+      checkExact(withQuotes, titleLower);
+
+    return isExact;
+  }
+
+  function splitStringByQuotes(string) {
+    const groups = /['"](.+?)['"]/g;
+    const withQuotes = Array.from(string.matchAll(groups), (match) => match[1]);
+    const withoutQuotes = string.replace(groups, '').split(' ').filter(Boolean);
+
+    const result = {
+      withQuotes,
+      withoutQuotes,
+    };
+
+    return result;
+  }
+
+  function shortKeywords(keywords) {
     const shortedKeywords = keywords.map((word) => {
-      if (word.length < 5) {
+      if (word.length <= 5) {
         return word;
       }
       return word.slice(0, word.length - Math.ceil(word.length / 4));
@@ -159,7 +180,7 @@ function filterByExact(filteredAllResults) {
   }
 
   function titleContainsWord(word, title) {
-    return title.toLowerCase().includes(word);
+    return title.includes(word);
   }
 
   return filteredByExact;
