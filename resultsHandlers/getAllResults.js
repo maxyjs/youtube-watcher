@@ -15,16 +15,7 @@ async function getAllResults(listQueries) {
 async function handleResultsForAllTerms(resultsForAllTerms) {
   console.log('\x1b[33m%s\x1b[0m', 'Результат парсинга:'); // font yellow
 
-  let allResultsWithoutDuplicates = deleteDuplicates(
-    combinedResultsForAllTerms
-  );
-  console.log(
-    '\x1b[36m%s\x1b[0m',
-    'Уникальные результаты: ',
-    allResultsWithoutDuplicates.length
-  );
-
-  let filteredByViews = filterByViews(allResultsWithoutDuplicates);
+  let filteredByViews = filterByViews(resultsForAllTerms);
   console.log(
     '\x1b[36m%s\x1b[0m',
     'Отфильтрованные по количеству просмотров: ',
@@ -44,22 +35,6 @@ async function handleResultsForAllTerms(resultsForAllTerms) {
   );
 
   return filteredAllResults;
-}
-
-function deleteDuplicates(combinedResultsForAllTerms) {
-  const videoIds = combinedResultsForAllTerms.map((result) => result.video.id);
-  const uniqueVideoIds = [...new Set(videoIds)];
-  const uniqueResults = [];
-
-  for (const uniqueId of uniqueVideoIds) {
-    const uniqueResult = combinedResultsForAllTerms.find((result) => {
-      return result.video.id === uniqueId;
-    });
-
-    uniqueResults.push(uniqueResult);
-  }
-
-  return uniqueResults;
 }
 
 async function addDataVideoInfoToAllResults(allResults) {
