@@ -25,65 +25,45 @@ async function handleResultsForAllTerms(resultsForAllTerms) {
   let exactResults = filterByExact(filteredByViews);
   console.log('\x1b[36m%s\x1b[0m', 'Точное совпадение: ', exactResults.length);
 
-  let allResultsWithData = await addDataVideoInfoToAllResults(exactResults);
+  let results = await addDataVideoInfoToAllResults(exactResults);
 
-  let filteredAllResults = filterByRating(allResultsWithData);
+  let filteredByRating = filterByRating(results);
   console.log(
     '\x1b[36m%s\x1b[0m',
     'Отфильтрованные по рейтингу: ',
-    filteredAllResults.length
+    filteredByRating.length
   );
 
-  return filteredAllResults;
+  let filteredByGlobalExcludeWords = filterByGlobalExcludeWords(
+    filteredByRating
+  );
+  console.log(
+    '\x1b[36m%s\x1b[0m',
+    'Отфильтрованные по словам исключениям: ',
+    filteredByGlobalExcludeWords.length
+  );
+
+  return filteredByGlobalExcludeWords;
 }
 
-async function addDataVideoInfoToAllResults(allResults) {
-  if (allResults.length === 0) {
-    return allResults;
-  }
+function filterByViews(results) {
+  const getViewsNumber = (result) => {
+    const viewsString = result.video.views;
+    const viewsNumber = +viewsString.replace(/\D/g, '');
+    return viewsNumber;
+  };
 
-  const results = [];
-
-  for await (const result of allResults) {
-    try {
-      const videoInfo = await getVideoInfo(result.video.id);
-      result.video.videoInfo = videoInfo;
-      results.push(result);
-    } catch (err) {
-      console.error(
-        '\x1b[36m%s\x1b[0m',
-        '[addDataVideoInfoToAllResults] \n ',
-        err
-      );
-    }
-  }
-
-  return results;
-}
-
-function filterByRating(allResults) {
-  if (allResults.length === 0) {
-    return allResults;
-  }
-
-  const filtered = allResults.filter((result) => {
-    const minRating = result.queryOptions.termOptions.minRating;
-
-    if (!result.video.videoInfo.rating) {
-      return false;
-    }
-
-    const isHR =
-      result.video.videoInfo.rating &&
-      result.video.videoInfo.rating > minRating;
-    return isHR;
+  const filtered = results.filter((result) => {
+    const views = getViewsNumber(result);
+    const minViews = result.queryOptions.termOptions.minViews;
+    return views < minViews ? false : true;
   });
 
   return filtered;
 }
 
-function filterByExact(filteredAllResults) {
-  const filteredByExact = filteredAllResults.filter(filterByTitle);
+function filterByExact(results) {
+  const filteredByExact = results.filter(filterByTitle);
 
   function filterByTitle(result) {
     const titleLower = result.video.title.toLowerCase();
@@ -91,11 +71,10 @@ function filterByExact(filteredAllResults) {
     const { withQuotes, withoutQuotes } = splitStringByQuotes(term);
     const shortedKeywords = shortKeywords(withoutQuotes);
 
-    const isExact =
-      checkExact(shortedKeywords, titleLower) &&
-      checkExact(withQuotes, titleLower);
+    const isExactWithoutQuotes = checkExact(shortedKeywords, titleLower);
+    const isExactWithQuotes = checkExact(withQuotes, titleLower);
 
-    return isExact;
+    return isExactWithoutQuotes && isExactWithQuotes;
   }
 
   function splitStringByQuotes(string) {
@@ -132,17 +111,73 @@ function filterByExact(filteredAllResults) {
   return filteredByExact;
 }
 
-function filterByViews(results) {
-  const getViewsNumber = (result) => {
-    const viewsString = result.video.views;
-    const viewsNumber = +viewsString.replace(/\D/g, '');
-    return viewsNumber;
-  };
+async function addDataVideoInfoToAllResults(results) {
+  if (results.length === 0) {
+    return results;
+  }
+
+  const handledResults = [];
+
+  for await (const result of results) {
+    try {
+      const videoInfo = await getVideoInfo(result.video.id);
+      result.video.videoInfo = videoInfo;
+      handledResults.push(result);
+    } catch (err) {
+      console.error(
+        '\x1b[36m%s\x1b[0m',
+        '[addDataVideoInfoToAllResults] \n ',
+        err
+      );
+    }
+  }
+
+  return handledResults;
+}
+
+function filterByRating(results) {
+  if (results.length === 0) {
+    return results;
+  }
 
   const filtered = results.filter((result) => {
-    const views = getViewsNumber(result);
-    const minViews = result.queryOptions.termOptions.minViews;
-    return views < minViews ? false : true;
+    const minRating = result.queryOptions.termOptions.minRating;
+
+    if (!result.video.videoInfo.rating) {
+      return false;
+    }
+
+    const isHR =
+      result.video.videoInfo.rating &&
+      result.video.videoInfo.rating > minRating;
+    return isHR;
+  });
+
+  return filtered;
+}
+
+function filterByGlobalExcludeWords(results) {
+  if (results.length === 0) {
+    return results;
+  }
+
+  const globalExcludeWords =
+    results[0].queryOptions.termOptions.globalExcludeWords;
+
+  if (!globalExcludeWords) {
+    return results;
+  }
+
+  const filtered = results.filter((result) => {
+    const title = result.video.title;
+    if (
+      globalExcludeWords.some((word) =>
+        title.toLowerCase().includes(word.toLowerCase())
+      )
+    ) {
+      return false;
+    }
+    return true;
   });
 
   return filtered;
