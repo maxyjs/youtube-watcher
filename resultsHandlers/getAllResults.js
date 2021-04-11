@@ -15,15 +15,6 @@ async function getAllResults(listQueries) {
 async function handleResultsForAllTerms(resultsForAllTerms) {
   console.log('\x1b[33m%s\x1b[0m', 'Результат парсинга:'); // font yellow
 
-  let combinedResultsForAllTerms = combineResultsForAllTerms(
-    resultsForAllTerms
-  );
-  console.log(
-    '\x1b[36m%s\x1b[0m',
-    'Общее количество результатов: ',
-    combinedResultsForAllTerms.length
-  );
-
   let allResultsWithoutDuplicates = deleteDuplicates(
     combinedResultsForAllTerms
   );
@@ -53,26 +44,6 @@ async function handleResultsForAllTerms(resultsForAllTerms) {
   );
 
   return filteredAllResults;
-}
-
-function combineResultsForAllTerms(resultsForAllTerms) {
-  let combinedResultsForAllTerms = resultsForAllTerms.reduce(
-    (acc, resultsForTerm, index) => {
-      try {
-        const results = resultsForTerm.map((result, index) => {
-          return result;
-        });
-        acc.push(results);
-      } catch (err) {}
-
-      return acc;
-    },
-    []
-  );
-
-  combinedResultsForAllTerms = combinedResultsForAllTerms.flat(1);
-
-  return combinedResultsForAllTerms;
 }
 
 function deleteDuplicates(combinedResultsForAllTerms) {
