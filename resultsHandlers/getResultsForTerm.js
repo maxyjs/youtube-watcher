@@ -1,8 +1,8 @@
 const scraper = require('../scrapers/scraper');
 const { showErrorResultScrapeSerp } = require('./../appSettings');
 
-function getVideosLengthOption(termOptions) {
-  const indexAllVideoLength = {
+function getVideosLengthParams(termOptions) {
+  const paramsAllVideoLength = {
     thisMonth: [
       '&sp=CAASBAgEEAE%253D', // by relevance
       '&sp=CAISBAgEEAE%253D', // by date upload
@@ -22,7 +22,7 @@ function getVideosLengthOption(termOptions) {
       '&sp=CAESAhAB', // by rating
     ],
   };
-  const indexLongVideo = {
+  const paramsLongVideo = {
     thisMonth: [
       '&sp=EgYIBBABGAI%253D', // by relevance
       '&sp=CAISBggEEAEYAg%253D%253D', // by date upload
@@ -45,28 +45,28 @@ function getVideosLengthOption(termOptions) {
 
   const { videosLength = 'allTimes' } = termOptions;
 
-  return videosLength === 'allTimes' ? indexAllVideoLength : indexLongVideo;
+  return videosLength === 'allTimes' ? paramsAllVideoLength : paramsLongVideo;
 }
 
 function createUrlsByDateTime(chunk, queryOptions) {
   const urls = [];
   const { termOptions = {} } = queryOptions;
-  const videosLengthOption = getVideosLengthOption(termOptions);
-  const whatTimes = termOptions.dateTimeUpload
+  const videosLengthOption = getVideosLengthParams(termOptions);
+  const timesUpload = termOptions.dateTimeUpload
     ? termOptions.dateTimeUpload
     : ['allTime', 'thisMonth', 'thisYear'];
 
-  const urlsByAllTimes = allTimes(chunk, videosLengthOption, whatTimes);
+  const urlsByAllTimes = allTimes(chunk, videosLengthOption, timesUpload);
 
   urls.push(...urlsByAllTimes);
 
   return urls;
 
-  function allTimes(chunk, indexTimes, whatTimes) {
+  function allTimes(chunk, videosLengthOption, timesUpload) {
     const setUrls = [];
 
-    for (const whatTime of whatTimes) {
-      const times = indexTimes[whatTime];
+    for (const whatTime of timesUpload) {
+      const times = videosLengthOption[whatTime];
       const urls = allSorted(chunk, times);
       setUrls.push(...urls);
     }
@@ -133,16 +133,16 @@ async function getResultsForAllUrls(resultsContainer, queryOptions) {
           });
         } catch {
           showErrorResultScrapeSerp &&
-          console.log(
-            '\x1b[33m%s\x1b[0m',
-            'PAGE 2: failed scrape url:\n',
-            `${url}&page=2`
-          ); // font yellow
+            console.log(
+              '\x1b[33m%s\x1b[0m',
+              'PAGE 2: failed scrape url:\n',
+              `${url}&page=2`
+            ); // font yellow
         }
       }
     } catch {
       showErrorResultScrapeSerp &&
-      console.log('\x1b[33m%s\x1b[0m', 'failed scrape url:\n', url); // font yellow
+        console.log('\x1b[33m%s\x1b[0m', 'failed scrape url:\n', url); // font yellow
     }
   }
 
