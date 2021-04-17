@@ -5,9 +5,6 @@ function getVideosLengthParams(termOptions) {
   const paramsAllVideoLength = {
     thisMonth: [
       '&sp=CAASBAgEEAE%253D', // by relevance
-      '&sp=CAISBAgEEAE%253D', // by date upload
-      '&sp=CAMSBAgEEAE%253D', // by views
-      '&sp=CAESBAgEEAE%253D', // by rating
     ],
     thisYear: [
       '&sp=CAASBAgFEAE%253D', // by relevance
@@ -25,9 +22,6 @@ function getVideosLengthParams(termOptions) {
   const paramsLongVideo = {
     thisMonth: [
       '&sp=EgYIBBABGAI%253D', // by relevance
-      '&sp=CAISBggEEAEYAg%253D%253D', // by date upload
-      '&sp=CAMSBggEEAEYAg%253D%253D', // by views
-      '&sp=CAESBggEEAEYAg%253D%253D', // by rating
     ],
     thisYear: [
       '&sp=CAASBggFEAEYAg%253D%253D', // by relevance
@@ -105,7 +99,7 @@ async function getResultsForAllUrls(resultsContainer, queryOptions) {
       });
     } catch {
       showErrorResultScrapeSerp &&
-      console.log('\x1b[33m%s\x1b[0m', 'failed scrape url:\n', url); // font yellow
+        console.log('\x1b[33m%s\x1b[0m', 'failed scrape url:\n', url); // font yellow
     }
   }
 
