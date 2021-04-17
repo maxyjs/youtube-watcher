@@ -2,11 +2,18 @@ const fs = require('fs');
 
 function getTermsFromFile(path) {
   let termsAsStringFromFile = fs.readFileSync(path, { encoding: 'utf8' });
-  termsAsStringFromFile = termsAsStringFromFile.replace(/(\r\n){2,}/g, '');
+  termsAsStringFromFile = termsAsStringFromFile.replace(/(\r?\n){2,}/g, '');
   termsAsStringFromFile = termsAsStringFromFile.replace(/[ ]{2,}/g, ' ');
   let termsArray = termsAsStringFromFile.split(/\r?\n/);
-  termsArray = termsArray.map((term) => term.trim());
-  const uniqueArray = [...new Set(termsArray)];
+  const termsArrayValid = termsArray.reduce((acc, term) => {
+    if (term !== '') {
+      term.trim();
+      const termLower = term.toLowerCase();
+      acc.push(termLower);
+    }
+    return acc;
+  }, []);
+  const uniqueArray = [...new Set(termsArrayValid)];
   return uniqueArray;
 }
 
@@ -15,7 +22,7 @@ function handleList(list, user) {
   let termOptions = list.termOptions;
 
   console.log('\x1b[33m%s\x1b[0m', 'Term Options:'); // font yellow
-  console.table(termOptions);
+  console.log(termOptions);
 
   termOptions = setOptionsForFilterResults(user, termOptions);
 
@@ -40,10 +47,11 @@ function mergeAllListsQueries(lists, user) {
   return listQueries;
 }
 
-function getListQueriesForUser(user) {
+function getListQueriesForUser(user, options) {
   try {
     const { userDirectory } = user;
-    const listQueriesPath = `${userDirectory}\\listsQueries\\lists.js`;
+    const listQueriesPath =
+      options.listQueriesPath || `${userDirectory}\\listsQueries\\lists.js`;
     const lists = require(listQueriesPath);
     const listQueries = mergeAllListsQueries(lists, user);
     return listQueries;
@@ -53,10 +61,17 @@ function getListQueriesForUser(user) {
 }
 
 function setOptionsForFilterResults(user, termOptions) {
-  const { defaultMinViews, defaultMinRating } = user;
+  const {
+    defaultMinViews,
+    defaultMinRating,
+    globalExcludeWords = [],
+    videosLength,
+  } = user;
   return {
     minViews: defaultMinViews,
     minRating: defaultMinRating,
+    globalExcludeWords,
+    videosLength,
     ...termOptions,
   };
 }

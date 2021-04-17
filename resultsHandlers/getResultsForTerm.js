@@ -1,12 +1,10 @@
 const scraper = require('../scrapers/scraper');
 const { showErrorResultScrapeSerp } = require('./../appSettings');
 
-function createUrlsByDateTime(chunk, queryOptions) {
-  const urls = [];
-
-  const indexTimes = {
+function getVideosLengthOption(termOptions) {
+  const indexAllVideoLength = {
     thisMonth: [
-      '&sp=EgIIBA%253D%253D', // by relevance
+      '&sp=CAASBAgEEAE%253D', // by relevance
       '&sp=CAISBAgEEAE%253D', // by date upload
       '&sp=CAMSBAgEEAE%253D', // by views
       '&sp=CAESBAgEEAE%253D', // by rating
@@ -18,20 +16,47 @@ function createUrlsByDateTime(chunk, queryOptions) {
       '&sp=CAESBAgFEAE%253D', // by rating
     ],
     allTime: [
-      '&sp=EgIQAQ%253D%253D', // by relevance
+      '&sp=CAASAhAB', // by relevance
       '&sp=CAISAhAB', // by date upload
       '&sp=CAMSAhAB', // by views
       '&sp=CAESAhAB', // by rating
     ],
   };
+  const indexLongVideo = {
+    thisMonth: [
+      '&sp=EgYIBBABGAI%253D', // by relevance
+      '&sp=CAISBggEEAEYAg%253D%253D', // by date upload
+      '&sp=CAMSBggEEAEYAg%253D%253D', // by views
+      '&sp=CAESBggEEAEYAg%253D%253D', // by rating
+    ],
+    thisYear: [
+      '&sp=CAASBggFEAEYAg%253D%253D', // by relevance
+      '&sp=CAISBggFEAEYAg%253D%253D', // by date upload
+      '&sp=CAMSBggFEAEYAg%253D%253D', // by views
+      '&sp=CAESBggFEAEYAg%253D%253D', // by rating
+    ],
+    allTime: [
+      '&sp=CAASBBABGAI%253D', // by relevance
+      '&sp=CAISBBABGAI%253D', // by date upload
+      '&sp=CAMSBBABGAI%253D', // by views
+      '&sp=CAESBBABGAI%253D', // by rating
+    ],
+  };
 
+  const { videosLength = 'allTimes' } = termOptions;
+
+  return videosLength === 'allTimes' ? indexAllVideoLength : indexLongVideo;
+}
+
+function createUrlsByDateTime(chunk, queryOptions) {
+  const urls = [];
   const { termOptions = {} } = queryOptions;
-
+  const videosLengthOption = getVideosLengthOption(termOptions);
   const whatTimes = termOptions.dateTimeUpload
     ? termOptions.dateTimeUpload
     : ['allTime', 'thisMonth', 'thisYear'];
 
-  const urlsByAllTimes = allTimes(chunk, indexTimes, whatTimes);
+  const urlsByAllTimes = allTimes(chunk, videosLengthOption, whatTimes);
 
   urls.push(...urlsByAllTimes);
 
@@ -108,16 +133,16 @@ async function getResultsForAllUrls(resultsContainer, queryOptions) {
           });
         } catch {
           showErrorResultScrapeSerp &&
-            console.log(
-              '\x1b[33m%s\x1b[0m',
-              'PAGE 2: failed scrape url:\n',
-              `${url}&page=2`
-            ); // font yellow
+          console.log(
+            '\x1b[33m%s\x1b[0m',
+            'PAGE 2: failed scrape url:\n',
+            `${url}&page=2`
+          ); // font yellow
         }
       }
     } catch {
       showErrorResultScrapeSerp &&
-        console.log('\x1b[33m%s\x1b[0m', 'failed scrape url:\n', url); // font yellow
+      console.log('\x1b[33m%s\x1b[0m', 'failed scrape url:\n', url); // font yellow
     }
   }
 
