@@ -75,40 +75,22 @@ function createUrlsByDateTime(chunk, queryOptions) {
   }
 
   function allSorted(chunk, times) {
-    const urls = times.map((time) => {
+    return times.map((time) => {
       return `${chunk}${time}`;
     });
-    return urls;
   }
 }
 
 function prepareUrlChunk(term) {
   const encodeTerm = encodeURIComponent(term);
-  const chunk = `https://www.youtube.com/results?q=${encodeTerm}`;
-  return chunk;
-}
-
-function modifyTermForSearchInTitleOnly(term) {
-  const words = term.split(' ');
-  const wordsWithIntitleCommand = words
-    .map((word) => {
-      return `intitle:${word}`;
-    })
-    .join(' ');
-  return wordsWithIntitleCommand;
+  return `https://www.youtube.com/results?q=${encodeTerm}`;
 }
 
 function createUrls(queryOptions) {
   const { term } = queryOptions;
   const chunk = prepareUrlChunk(term);
-  const urlInTitleKeywords = prepareUrlChunk(
-    modifyTermForSearchInTitleOnly(term)
-  );
 
-  const urls = createUrlsByDateTime(chunk, queryOptions);
-  urls.push(urlInTitleKeywords);
-
-  return urls;
+  return createUrlsByDateTime(chunk, queryOptions);
 }
 
 async function getResultsForAllUrls(resultsContainer, queryOptions) {
@@ -121,28 +103,9 @@ async function getResultsForAllUrls(resultsContainer, queryOptions) {
         result.queryOptions = queryOptions;
         resultsContainer.addResult(result);
       });
-
-      if (results.length >= 20) {
-        try {
-          const resultsPage2 = await scraper.scrapeResultSearchPage(
-            `${url}&page=2`
-          );
-          resultsPage2.forEach((result) => {
-            result.queryOptions = queryOptions;
-            resultsContainer.addResult(result);
-          });
-        } catch {
-          showErrorResultScrapeSerp &&
-            console.log(
-              '\x1b[33m%s\x1b[0m',
-              'PAGE 2: failed scrape url:\n',
-              `${url}&page=2`
-            ); // font yellow
-        }
-      }
     } catch {
       showErrorResultScrapeSerp &&
-        console.log('\x1b[33m%s\x1b[0m', 'failed scrape url:\n', url); // font yellow
+      console.log('\x1b[33m%s\x1b[0m', 'failed scrape url:\n', url); // font yellow
     }
   }
 
