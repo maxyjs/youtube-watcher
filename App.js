@@ -8,7 +8,7 @@ async function App() {
   let testMode = false;
 
   const argv = yargs(hideBin(process.argv)).argv;
-  const { user: userName, test } = argv;
+  const { user: userName, test, listQueriesPath } = argv;
   testMode = !!test;
 
   if (!userName) {
@@ -18,7 +18,13 @@ async function App() {
 
   await generalProcessController(userName, {
     testMode,
+    listQueriesPath,
   });
+
+  process.exit(0);
 }
 
-App();
+App().catch((error) => {
+  console.error(error);
+  process.exit(1);
+});
