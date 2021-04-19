@@ -1,24 +1,74 @@
-const { showResultScrapeSerp } = require('../appSettings');
-const puppeteer = require('puppeteer');
+const axios = require('axios');
 
-async function scrapeByBrowser(url, getContents) {
-  const browser = await puppeteer.launch({
-    headless: true,
+async function scrapeResultSearchPage(url) {
+  const html = await getHTML(url);
+  const results = parseHtml(html);
+  return results;
+}
+
+async function getHTML(url) {
+  try {
+    const { data } = await axios.get(url);
+    return data;
+  } catch (err) {
+    console.error(err);
+  }
+}
+
+function getContents(html) {
+  let contents = [];
+  let data = null;
+
+  const re = /(?:var ytInitialData = )(.*?)(?:[;])/;
+  const dataText = html.match(re)[1] || undefined;
+  if (dataText === undefined) {
+    return contents;
+  }
+  try {
+    data = JSON.parse(dataText);
+    contents =
+      data.contents?.twoColumnSearchResultsRenderer?.primaryContents
+        ?.sectionListRenderer?.contents[0]?.itemSectionRenderer?.contents;
+    return contents;
+  } catch (err) {
+    return contents;
+  }
+}
+
+function parseHtml(html) {
+  const results = [];
+  const contents = getContents(html);
+
+  contents.forEach((content) => {
+    if (content.hasOwnProperty('videoRenderer')) {
+      const lengthText = content.videoRenderer.lengthText;
+
+      // Ignore type video "Live"
+      if (lengthText !== undefined) {
+        results.push(parseVideoRenderer(content.videoRenderer));
+      }
+    }
   });
 
-  const page = await browser.newPage();
-  await page.goto(url);
-  let contents = await page.evaluate(getContents);
-  await browser.close();
-
-  return contents;
+  return results;
 }
 
 function parseVideoRenderer(renderer) {
+  let uploader = {
+    username: renderer.ownerText.runs[0].text,
+    url: `https://www.youtube.com${renderer.ownerText.runs[0].navigationEndpoint.commandMetadata.webCommandMetadata.url}`,
+  };
+  uploader.verified =
+    (renderer.ownerBadges &&
+      renderer.ownerBadges.some(
+        (badge) => badge.metadataBadgeRenderer.style.indexOf('VERIFIED') > -1
+      )) ||
+    false;
+
   let video = {
     id: renderer.videoId,
-    title: renderer.title.runs.reduce((acc, run) => {
-      return acc + run.text;
+    title: renderer.title.runs.reduce((acc, item) => {
+      return acc + item.text;
     }, ''),
     url: `https://www.youtube.com${renderer.navigationEndpoint.commandMetadata.webCommandMetadata.url}`,
     duration: renderer.lengthText ? renderer.lengthText.simpleText : 'Live',
@@ -36,63 +86,18 @@ function parseVideoRenderer(renderer) {
       .url,
     views: renderer.viewCountText
       ? renderer.viewCountText.simpleText ||
-      renderer.viewCountText.runs.reduce((acc, run) => {
-        return acc + run.text;
+      renderer.viewCountText.runs.reduce((acc, item) => {
+        return acc + item.text;
       }, '')
       : renderer.publishedTimeText
         ? '0 views'
         : '0 watching',
-    uploader: {
-      username: renderer.ownerText.runs[0].text,
-      url: `https://www.youtube.com${renderer.ownerText.runs[0].navigationEndpoint.commandMetadata.webCommandMetadata.url}`,
-    },
-  };
 
-  if (showResultScrapeSerp === true) {
-    console.log('title: = ', video.title);
-    console.log('upload_date: = ', video.upload_date);
-    console.log('views: = ', video.views);
-    console.log('*************************');
-  }
+    uploader,
+  };
 
   const resultParse = { video };
   return resultParse;
-}
-
-function parseContents(contents) {
-  const results = [];
-  contents.forEach((sectionList) => {
-    if (sectionList?.itemSectionRenderer?.contents) {
-      sectionList.itemSectionRenderer.contents.forEach((content) => {
-        try {
-          if (content.hasOwnProperty('videoRenderer')) {
-            const lengthText = content.videoRenderer.lengthText;
-
-            // Ignore type video "Live"
-            if (lengthText !== undefined) {
-              results.push(parseVideoRenderer(content.videoRenderer));
-            }
-          }
-        } catch (ex) {
-          console.log(ex);
-          console.log(content);
-        }
-      });
-    }
-  });
-  return results;
-}
-
-function getContents() {
-  const contents =
-    window.ytInitialData.contents.twoColumnSearchResultsRenderer.primaryContents
-      .sectionListRenderer.contents;
-  return contents;
-}
-
-async function scrapeResultSearchPage(url) {
-  const contents = await scrapeByBrowser(url, getContents);
-  return parseContents(contents);
 }
 
 module.exports.scrapeResultSearchPage = scrapeResultSearchPage;
