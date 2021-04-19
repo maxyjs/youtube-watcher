@@ -2,8 +2,38 @@ const getAllResults = require('../resultsHandlers/getAllResults');
 const getViewedVideosForUser = require('./../userHandlers/userViewedControllers/getViewedVideosForUser');
 const getListQueriesForUser = require('./getListQueriesForUser');
 
-async function findNewResultsForUser(user, cacheAddedVideoToPlaylist) {
-  const listQueries = getListQueriesForUser(user);
+function filterResultsByViewed(viewedVideos, allResults) {
+  const newResults = allResults.filter((result) => {
+    if (viewedVideos[result.video.id]) {
+      return false;
+    } else {
+      return true;
+    }
+  });
+
+  return newResults;
+}
+
+function filterByLanguage(results) {
+  const filtered = results.filter((result) => {
+    if (
+      result.queryOptions.termOptions.onlyRuLang === true &&
+      detectNotRus(result.video.videoInfo.originTitle)
+    ) {
+      return false;
+    }
+    return true;
+  });
+  function detectNotRus(title) {
+    const isHasCirillic = /[а-яА-ЯЁё]/.test(title);
+    return !isHasCirillic;
+  }
+
+  return filtered;
+}
+
+async function findNewResultsForUser(user, cacheAddedVideoToPlaylist, options) {
+  const listQueries = getListQueriesForUser(user, options);
   const { value: viewedVideos } = await getViewedVideosForUser(user);
   const allResults = await getAllResults(listQueries);
 
@@ -27,21 +57,14 @@ async function findNewResultsForUser(user, cacheAddedVideoToPlaylist) {
     filteredByAdded.length
   );
 
-  return filteredByAdded;
-}
+  const filteredByLanguage = filterByLanguage(filteredByAdded);
+  console.log(
+    '\x1b[36m%s\x1b[0m',
+    'Отфильрованные по языку: ',
+    filteredByLanguage.length
+  );
 
-function filterResultsByViewed(viewedVideos, allResults) {
-  let newResults = [];
-
-  newResults = allResults.filter((result) => {
-    if (viewedVideos[result.video.id]) {
-      return false;
-    } else {
-      return true;
-    }
-  });
-
-  return newResults;
+  return filteredByLanguage;
 }
 
 module.exports = findNewResultsForUser;
