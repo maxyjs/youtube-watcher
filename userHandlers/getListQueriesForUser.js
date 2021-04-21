@@ -66,12 +66,15 @@ function setOptionsForFilterResults(user, termOptions) {
     defaultMinRating,
     globalExcludeWords = [],
     videosLength,
+    onlyRuLang = false,
   } = user;
+
   return {
     minViews: defaultMinViews,
     minRating: defaultMinRating,
     globalExcludeWords,
     videosLength,
+    onlyRuLang,
     ...termOptions,
   };
 }
