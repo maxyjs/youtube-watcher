@@ -1,5 +1,5 @@
 const getResultsForTerm = require('./getResultsForTerm.js');
-const resultsContainer = require('./../resultsHandlers/resultsContainer');
+const resultsContainer = require('.//resultsContainer');
 
 async function getResultsForAllTerms(listQueries) {
   for (const listQuery of listQueries) {

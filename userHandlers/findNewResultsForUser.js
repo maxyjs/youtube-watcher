@@ -1,4 +1,4 @@
-const getAllResults = require('../resultsHandlers/getAllResults');
+const getAllResults = require('../results/getAllResults');
 const getViewedVideosForUser = require('./../userHandlers/userViewedControllers/getViewedVideosForUser');
 const getListQueriesForUser = require('./getListQueriesForUser');
 
