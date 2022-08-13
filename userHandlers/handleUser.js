@@ -1,7 +1,7 @@
 const findNewResultsForUser = require('./findNewResultsForUser');
 const addAllVideosToPlaylist = require('./userPlaylistsHandlers/addAllVideosToPlaylist');
 const checkUserAuthDataValid = require('../userHandlers/checkUserAuthDataValid');
-const CacheAddedVideoToPlaylist = require('../cacheManagers/CacheAddedVideoToPlaylist');
+const CacheAddedVideoToPlaylist = require('../cache/CacheAddedVideoToPlaylist');
 
 async function handleUser(user, options) {
   const { testMode } = options || false;
