@@ -87,7 +87,7 @@ function createUrls(queryOptions) {
   return createUrlsByDateTime(chunk, queryOptions);
 }
 
-async function getResultsForAllUrls(resultsContainer, queryOptions) {
+async function getResultsForAllUrls(resultsStore, queryOptions) {
   const urls = createUrls(queryOptions);
 
   for (const url of urls) {
@@ -95,7 +95,7 @@ async function getResultsForAllUrls(resultsContainer, queryOptions) {
       const results = await scraper.scrapeResultSearchPage(url);
       results.forEach((result) => {
         result.queryOptions = queryOptions;
-        resultsContainer.addResult(result);
+        resultsStore.addResult(result);
       });
     } catch {
       showErrorResultScrapeSerp &&
@@ -103,11 +103,11 @@ async function getResultsForAllUrls(resultsContainer, queryOptions) {
     }
   }
 
-  return resultsContainer;
+  return resultsStore;
 }
 
-async function getResultsForTerm(resultsContainer, queryOptions) {
-  await getResultsForAllUrls(resultsContainer, queryOptions);
+async function getResultsForTerm(resultsStore, queryOptions) {
+  await getResultsForAllUrls(resultsStore, queryOptions);
 }
 
 module.exports = getResultsForTerm;

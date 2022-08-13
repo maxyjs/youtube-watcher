@@ -1,16 +1,16 @@
 const getResultsForTerm = require('./getResultsForTerm.js');
-const resultsContainer = require('.//resultsContainer');
+const resultsStore = require('.//resultsStore');
 
 async function getResultsForAllTerms(listQueries) {
   for (const listQuery of listQueries) {
     try {
-      await getResultsForTerm(resultsContainer, listQuery);
+      await getResultsForTerm(resultsStore, listQuery);
     } catch (err) {
       console.log(err);
     }
   }
 
-  return resultsContainer.getResults();
+  return resultsStore.getResults();
 }
 
 module.exports = getResultsForAllTerms;

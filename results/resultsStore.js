@@ -1,4 +1,4 @@
-const resultsContainer = {
+const resultsStore = {
   results: [],
   addedIds: new Set(),
 
@@ -15,5 +15,5 @@ const resultsContainer = {
   },
 };
 
-module.exports = resultsContainer;
+module.exports = resultsStore;
 
