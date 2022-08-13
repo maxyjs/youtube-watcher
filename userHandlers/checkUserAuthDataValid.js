@@ -1,5 +1,5 @@
 const getInstanceBrowser = require('../Browser/getInstanceBrowser');
-const checkCookiesFile = require('../cookiesHandlers/checkCookiesFile');
+const checkCookiesFile = require('../cookies/checkCookiesFile');
 
 async function checkUserAuthDataValid(user) {
   const resultChecked = await checkCookiesFile(user);
