@@ -1,5 +1,5 @@
 #!/usr/bin/env node
-const generalProcessController = require('./processControllers/generalProcessController');
+const generalProcessController = require('./process/generalProcessController');
 
 const yargs = require('yargs/yargs');
 const { hideBin } = require('yargs/helpers');
